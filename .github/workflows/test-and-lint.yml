@@ -12,7 +12,7 @@ name: Build and Deploy to GKE
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   PROJECT_ID: steveoverflow-289df 
