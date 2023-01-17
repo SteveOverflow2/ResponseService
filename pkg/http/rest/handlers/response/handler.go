@@ -26,6 +26,7 @@ func CreateResponseHandler(responseService response.ResponseService) func(w http
 			handlers.RenderErrorResponse(w, "Invalid request payload", r.URL.Path, util.WrapErrorf(err, util.ErrorCodeInvalid, err.Error()))
 			return
 		}
+
 		handlers.RenderResponse(w, http.StatusOK, responseId)
 
 	}
@@ -45,7 +46,6 @@ func GetResponseHandler(responseService response.ResponseService) func(w http.Re
 			handlers.RenderErrorResponse(w, "internal server error", r.URL.Path, util.WrapErrorf(err, util.ErrorCodeInternal, err.Error()))
 			return
 		}
-
 		handlers.RenderResponse(w, http.StatusOK, response)
 	}
 }

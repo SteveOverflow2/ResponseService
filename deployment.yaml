@@ -43,8 +43,8 @@ spec:
     kind: "Deployment"
     name: "response-service"
     apiVersion: "apps/v1"
-  minReplicas: 5
-  maxReplicas: 5
+  minReplicas: 2
+  maxReplicas: 100
   metrics:
   - type: "Resource"
     resource:

@@ -29,7 +29,7 @@ COPY --from=builder --chown=nonroot:nonroot /app/main /main
 COPY --from=builder --chown=nonroot:nonroot /app/.env /.env
 
 # Expose port 8080 to the outside world
-EXPOSE 8080
+EXPOSE 8082
 
 # Create nonroot user
 USER nonroot:nonroot

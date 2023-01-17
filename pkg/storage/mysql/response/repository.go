@@ -3,6 +3,7 @@ package response
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"response-service/pkg/response"
 	"time"
 
@@ -20,14 +21,15 @@ func NewResponseRepository(ctx context.Context, db *sql.DB) response.ResponseRep
 }
 
 func (p *responseRepository) CreateResponse(ctx context.Context, response response.CreateResponse) (string, error) {
-	createResponseQuery := "INSERT INTO response (_id, title, description, createdAt, views, answers, votes, responseer) VALUES (?,?,?,?,?,?,?,?);"
+	fmt.Printf("\" create\": %v\n", " create")
+	createResponseQuery := "INSERT INTO response (_id, post_id, description, createdAt, poster) VALUES (?,?,?,?,?);"
 	stmt, err := p.db.Prepare(createResponseQuery)
 	if err != nil {
 		return "", err
 	}
 	defer stmt.Close()
 	newId := uuid.New().String()
-	_, err = stmt.Exec(newId, response.Title, response.Body, time.Now().Unix(), 0, 0, 0, response.Subject)
+	_, err = stmt.Exec(newId, response.PostId, response.Description, time.Now().Unix(), response.Subject)
 	if err != nil {
 		return "", err
 	}
@@ -45,7 +47,7 @@ func (p *responseRepository) GetAllResponses(ctx context.Context) ([]response.Re
 	defer result.Close()
 	for result.Next() {
 		var response response.Response
-		err := result.Scan(&response.Id, &response.Title, &response.Description, &response.CreatedAt, &response.Views, &response.Answers, &response.Votes, &response.Responseer)
+		err := result.Scan(&response.Uuid, &response.PostId, &response.Description, &response.CreatedAt, &response.Poster)
 		if err != nil {
 			return nil, err
 		}
@@ -53,21 +55,39 @@ func (p *responseRepository) GetAllResponses(ctx context.Context) ([]response.Re
 	}
 	return responses, nil
 }
-func (p *responseRepository) GetResponse(ctx context.Context, uuid string) (*response.Response, error) {
-	getAllResponses := "SELECT * FROM response WHERE _id = ?;"
+func (p *responseRepository) GetResponse(ctx context.Context, uuid string) ([]response.Response, error) {
+	getAllResponses := "SELECT * FROM response WHERE post_id = ?;"
 
+	var responses []response.Response
 	result, err := p.db.Query(getAllResponses, uuid)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer result.Close()
-	var response response.Response
-
 	for result.Next() {
-		err := result.Scan(&response.Id, &response.Title, &response.Description, &response.CreatedAt, &response.Views, &response.Answers, &response.Votes, &response.Responseer)
+		var response response.Response
+		err := result.Scan(&response.Uuid, &response.PostId, &response.Description, &response.CreatedAt, &response.Poster)
 		if err != nil {
 			return nil, err
 		}
+		responses = append(responses, response)
 	}
-	return &response, nil
+	return responses, nil
+}
+
+func (p *responseRepository) DeleteResponses(ctx context.Context, uuid string) {
+	updateTime := "DELETE FROM response WHERE post_id = ?"
+	stmt, err := p.db.Prepare(updateTime)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(uuid)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return
+	}
+	fmt.Printf("\" succes\": %v\n", " succes")
+	return
 }
